@@ -6,7 +6,7 @@ CXX_FLAGS := -O3 -std=c++20 -Wno-unused-result -Wno-deprecated-declarations
 INCLUDES := -I ./src -I ./src/imgui -I ./src/imgui-sfml/
 LDFLAGS  := -O3 -lsfml-window -lsfml-graphics -lsfml-system -lsfml-audio -lGL
 
-SRC_FILES := $(wildcard ./src/*.cpp ./src/imgui/*.cpp)
+SRC_FILES := $(wildcard ./src/*.cpp ./src/imgui/*.cpp ./src/imgui-sfml/*.cpp)
 OBJ_FILES := $(SRC_FILES:.cpp=.o)
 
 DEP_FILES := $(SRC_FILES:.cpp=.d)
