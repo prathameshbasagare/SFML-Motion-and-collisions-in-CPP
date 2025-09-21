@@ -5,102 +5,56 @@
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(800, 600), "SFML + ImGui Demo");
-    window.setFramerateLimit(60);
+    const int wWidth = 1280;
+    const int wHeight = 720;
+    sf::RenderWindow window(sf::VideoMode(wWidth, wHeight), "SFML Works");
     
-    // Initialize ImGui with SFML
-    if (!ImGui::SFML::Init(window)) {
-        std::cerr << "Failed to initialize ImGui with SFML!" << std::endl;
-        return -1;
-    }
-    
-    sf::CircleShape shape(100.f);
-    shape.setFillColor(sf::Color::Green);
-    shape.setPosition(350, 250);
-    
-    // ImGui state variables
-    bool show_demo_window = true;
-    bool show_another_window = false;
-    sf::Color bg_color = sf::Color(114, 144, 154);
-    float f = 0.0f;
-    int counter = 0;
-    
-    sf::Clock deltaClock;
-    
-    while (window.isOpen())
+    // window.setVerticalSyncEnabled(true); // call it once, after creating the window
+    sf:: CircleShape circle(50);
+    circle.setFillColor(sf::Color::Green);
+    circle.setPosition(300.0f, 300.0f);
+    float circleMoveSpeed = 0.5f;
+
+
+    sf::Font myFont;
+    if (!myFont.loadFromFile("../fonts/Roboto-Black.ttf")) 
     {
-        sf::Event event;
-        while (window.pollEvent(event))
+        std::cerr << "Error: Failed to load font from 'fonts/Roboto-Black.ttf'" << std::endl;
+        exit(-1);
+    }
+    window.setFramerateLimit(60); // call it once, after creating the window
+
+    sf::Text text("Sample text", myFont, 24);
+
+    text.setPosition(0, wHeight - (float)text.getCharacterSize());
+
+
+    while(window.isOpen())
+    {
+        sf::Event e;
+        while(window.pollEvent(e))
         {
-            ImGui::SFML::ProcessEvent(window, event);
-            
-            if (event.type == sf::Event::Closed)
+            if(e.type == sf::Event::Closed)
+            {
                 window.close();
+            }
+            if(e.type == sf::Event::KeyPressed)
+            {
+                std::cout<<"Key pressed with code = "<<e.key.code << std::endl;
+
+                if(e.key.code == sf::Keyboard::X)
+                {
+                    std::cout<<"Direction changed\n";
+                    circleMoveSpeed *= -1.0f;
+                }
+            }
         }
-        
-        // Calculate delta time properly
-        sf::Time deltaTime = deltaClock.restart();
-        float dt = deltaTime.asSeconds();
-        
-        // Ensure minimum delta time to prevent ImGui errors
-        if (dt <= 0.0f) {
-            dt = 1.0f / 60.0f; // Assume 60 FPS if delta time is invalid
-        }
-        
-        // Update ImGui
-        ImGui::SFML::Update(window, sf::seconds(dt));
-        
-        // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-        if (show_demo_window)
-            ImGui::ShowDemoWindow(&show_demo_window);
-        
-        // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
-        {
-            static float f = 0.0f;
-            static int counter = 0;
-            
-            ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-            
-            ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-            ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-            ImGui::Checkbox("Another Window", &show_another_window);
-            
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::ColorEdit3("clear color", (float*)&bg_color); // Edit 3 floats representing a color
-            
-            if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-                counter++;
-            ImGui::SameLine();
-            ImGui::Text("counter = %d", counter);
-            
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-            ImGui::End();
-        }
-        
-        // 3. Show another simple window.
-        if (show_another_window)
-        {
-            ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-            ImGui::Text("Hello from another window!");
-            if (ImGui::Button("Close Me"))
-                show_another_window = false;
-            ImGui::End();
-        }
-        
-        // Set the background color
-        window.clear(bg_color);
-        
-        // Draw SFML content
-        window.draw(shape);
-        
-        // Render ImGui
-        ImGui::SFML::Render(window);
-        
+        circle.setPosition(circle.getPosition().x - circleMoveSpeed, circle.getPosition().y - circleMoveSpeed);
+
+        window.clear();
+        window.draw(circle);
+        window.draw(text);
         window.display();
     }
-    
-    // Cleanup
-    ImGui::SFML::Shutdown();
-    
     return 0;
 }
