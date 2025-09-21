@@ -101,8 +101,7 @@ int main()
     std::ifstream configFile("../config.txt");
     std::string line;
     
-    // std::vector<std::shared_ptr<sf::Shape>> shapes;
-    // std::vector<sf::Vector2f> velocities;
+
     std::vector<Circle> circles;
     std::vector<Rect> recs;
     std::string font_path;
@@ -153,14 +152,12 @@ int main()
     }
     window.setFramerateLimit(1000); // call it once, after creating the window
 
-    sf::Text text("Sample text", myFont, font_size);
-    text.setFillColor(sf::Color(font_r, font_g, font_b));
+    // sf::Text text("Sample text", myFont, font_size);
+    // text.setFillColor(sf::Color(font_r, font_g, font_b));
 
-    text.setPosition(0, wHeight - (float)text.getCharacterSize());
+    // text.setPosition(0, wHeight - (float)text.getCharacterSize());
 
-    
-
-    
+ 
    
     while(window.isOpen())
     {
@@ -173,18 +170,9 @@ int main()
             }
             if(e.type == sf::Event::KeyPressed)
             {
-                std::cout<<"Key pressed with code = "<<e.key.code << std::endl;
-
                 if(e.key.code == sf::Keyboard::X)
                 {
-                    // for(auto &shape:circles)
-                    // {
-                    //     shape.invertXSpeed();   
-                    // }
-                    // for(auto &shape:recs)
-                    // {
-                    //     shape.invertYSpeed();   
-                    // }
+                    // Not necessary for now.
                 }
             }
         }
