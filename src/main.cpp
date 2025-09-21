@@ -37,6 +37,17 @@ class Rect
     {
         velocity.y *= -1.0f;
     }
+    void handleCollision(int wWidth, int wHeight){
+        float x = shape->getPosition().x, y= shape->getPosition().y;
+        sf::Vector2f dim = shape->getSize();
+
+        if(x<=0 || x + dim.x >= wWidth){
+            this->invertXSpeed();
+        }
+        if(y<=0 || y+ dim.y >= wHeight){
+            this->invertYSpeed();
+        }
+    }
 };
 class Circle
 {
@@ -68,7 +79,20 @@ class Circle
     {
         velocity.y *= -1.0f;
     }
+    void handleCollision(int wWidth, int wHeight){
+        float x = shape->getPosition().x, y= shape->getPosition().y;
+        float radius = shape->getRadius();
+
+        if(x<=0 || x + 2 * radius >= wWidth){
+            this->invertXSpeed();
+        }
+        if(y<=0 || y+ 2 * radius >= wHeight){
+            this->invertYSpeed();
+        }
+    }
 };
+
+
 int main()
 {
     int wWidth = 1280;
@@ -164,12 +188,15 @@ int main()
                 }
             }
         }
+
         for(auto &shape:circles)
         {
+            shape.handleCollision(wWidth,wHeight);
             shape.move();   
         }
         for(auto &shape:recs)
         {
+            shape.handleCollision(wWidth,wHeight);
             shape.move();   
         }
 
