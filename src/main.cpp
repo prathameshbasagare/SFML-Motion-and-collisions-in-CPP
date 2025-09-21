@@ -18,7 +18,7 @@ int main()
 
 
     sf::Font myFont;
-    if (!myFont.loadFromFile("../fonts/Roboto-Black.ttf")) 
+    if (!myFont.loadFromFile("fonts/Roboto-Black.ttf")) 
     {
         std::cerr << "Error: Failed to load font from 'fonts/Roboto-Black.ttf'" << std::endl;
         exit(-1);
