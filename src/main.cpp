@@ -2,7 +2,8 @@
 #include "imgui/imgui.h"
 #include "imgui-sfml/imgui-SFML.h"
 #include <iostream>
-
+#include<vector>
+#include<memory>
 int main()
 {
     const int wWidth = 1280;
@@ -28,6 +29,13 @@ int main()
 
     text.setPosition(0, wHeight - (float)text.getCharacterSize());
 
+    std::vector<std::shared_ptr<sf::Shape>> shapes;
+
+    std::shared_ptr<sf::Shape> c = std::make_shared<sf::CircleShape>(50);
+    std::shared_ptr<sf::Shape> r = std::make_shared<sf::RectangleShape>(sf::Vector2f(300,100));
+    shapes.push_back(c);
+    shapes.push_back(r);
+    r->setPosition(300, 300);
 
     while(window.isOpen())
     {
@@ -49,10 +57,16 @@ int main()
                 }
             }
         }
-        circle.setPosition(circle.getPosition().x - circleMoveSpeed, circle.getPosition().y - circleMoveSpeed);
+        for(auto &circle:shapes)
+        {
+            circle->setPosition(circle->getPosition().x - circleMoveSpeed, circle->getPosition().y - circleMoveSpeed);
+        }
 
         window.clear();
-        window.draw(circle);
+        for(auto &shape:shapes)
+        {
+            window.draw(*shape);
+        }
         window.draw(text);
         window.display();
     }
