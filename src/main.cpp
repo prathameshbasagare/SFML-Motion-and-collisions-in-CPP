@@ -6,6 +6,63 @@
 #include<memory>
 #include<fstream>
 #include<sstream>
+
+class Rect
+{
+    std::shared_ptr<sf::RectangleShape> shape;
+    sf::Vector2f velocity;
+    public:
+    Rect(float x, float y, float r, float g, float b, float width, float height)
+    {
+        shape = std::make_shared<sf::RectangleShape>(sf::Vector2f(width, height));
+        shape->setFillColor(sf::Color(r, g, b, 255));
+        shape->setPosition(x, y);
+    }
+    sf::RectangleShape get()
+    {
+        return *shape;
+    }
+    void setSpeed(float vx, float vy)
+    {
+        velocity.x = vx;
+        velocity.y = vy;
+    }
+    void invertXSpeed(){
+        velocity.x *= -1.0f;
+    }
+    void invertYSpeed()
+    {
+        velocity.y *= -1.0f;
+    }
+};
+class Circle
+{
+    std::shared_ptr<sf::CircleShape> shape;
+    sf::Vector2f velocity;
+    public:
+    Circle(float x, float y, float r, float g, float b, float R)
+    {
+        shape = std::make_shared<sf::CircleShape>(R);
+        shape->setFillColor(sf::Color(r, g, b, 255));
+        shape->setPosition(x, y);
+    }
+    sf::CircleShape get()
+    {
+        return *shape;
+    }
+    void setSpeed(float vx, float vy)
+    {
+        velocity.x = vx;
+        velocity.y = vy;
+    }
+    void invertXSpeed(){
+        velocity.x *= -1.0f;
+    }
+    void invertYSpeed()
+    {
+        velocity.y *= -1.0f;
+    }
+};
 int main()
 {
     int wWidth = 1280;
@@ -14,8 +71,10 @@ int main()
     std::ifstream configFile("../config.txt");
     std::string line;
     
-    std::vector<std::shared_ptr<sf::Shape>> shapes;
-    std::vector<sf::Vector2f> velocities;
+    // std::vector<std::shared_ptr<sf::Shape>> shapes;
+    // std::vector<sf::Vector2f> velocities;
+    std::vector<Circle> circles;
+    std::vector<Rect> recs;
     std::string font_path;
     float font_size, font_r, font_g, font_b;
 
@@ -36,33 +95,23 @@ int main()
             float x, y, vx, vy, r, g, b, R;
             iss >> name >> x >> y >> vx >> vy >> r >> g >> b >> R;
             
-            auto circle = std::make_shared<sf::CircleShape>(R);
-            circle->setFillColor(sf::Color(r, g, b));
-            circle->setPosition(x, y);
-            shapes.push_back(circle);
-            velocities.push_back(sf::Vector2f(vx, vy));
+            Circle c(x,y,r,g,b,R);
+            c.setSpeed(vx,vy);
+            circles.push_back(c);
         }
         else if (type == "Rectangle") {
             std::string name;
             float x, y, vx, vy, r, g, b, width, height;
             iss >> name >> x >> y >> vx >> vy >> r >> g >> b >> width >> height;
             
-            auto rect = std::make_shared<sf::RectangleShape>(sf::Vector2f(width, height));
-            rect->setFillColor(sf::Color(r, g, b, 255));
-            rect->setPosition(x, y);
-            shapes.push_back(rect);
-            velocities.push_back(sf::Vector2f(vx, vy));
+            Rect c(x,y,r,g,b,width,height);
+            c.setSpeed(vx,vy);
+            recs.push_back(c);
         }
     }
 
     
     sf::RenderWindow window(sf::VideoMode(wWidth, wHeight), "SFML Works");
-    
-    // // window.setVerticalSyncEnabled(true); // call it once, after creating the window
-    // sf:: CircleShape circle(50);
-    // circle.setFillColor(sf::Color::Green);
-    // circle.setPosition(300.0f, 300.0f);
-    // float circleMoveSpeed = 0.5f;
 
 
     
@@ -98,22 +147,20 @@ int main()
 
                 if(e.key.code == sf::Keyboard::X)
                 {
-                    std::cout<<"Direction changed\n";
-                    // circleMoveSpeed *= -1.0f;
+                
                 }
             }
         }
-        for(size_t i = 0; i < shapes.size(); i++)
-        {
-            auto& shape = shapes[i];
-            auto& velocity = velocities[i];
-            shape->setPosition(shape->getPosition().x + velocity.x, shape->getPosition().y + velocity.y);
-        }
+        
 
         window.clear();
-        for(auto &shape:shapes)
+        for(auto &shape:circles)
         {
-            window.draw(*shape);
+            window.draw(shape.get());
+        }
+        for(auto &shape:recs)
+        {
+            window.draw(shape.get());
         }
         window.draw(text);
         window.display();
