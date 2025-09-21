@@ -151,7 +151,7 @@ int main()
         std::cerr << "Error: Failed to load font from '" << font_path << "'" << std::endl;
         exit(-1);
     }
-    window.setFramerateLimit(120); // call it once, after creating the window
+    window.setFramerateLimit(1000); // call it once, after creating the window
 
     sf::Text text("Sample text", myFont, font_size);
     text.setFillColor(sf::Color(font_r, font_g, font_b));
