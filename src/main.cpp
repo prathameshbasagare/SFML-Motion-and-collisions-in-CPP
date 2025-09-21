@@ -4,39 +4,85 @@
 #include <iostream>
 #include<vector>
 #include<memory>
+#include<fstream>
+#include<sstream>
 int main()
 {
-    const int wWidth = 1280;
-    const int wHeight = 720;
+    int wWidth = 1280;
+    int wHeight = 720;
+    // Load shapes from config.txt
+    std::ifstream configFile("../config.txt");
+    std::string line;
+    
+    std::vector<std::shared_ptr<sf::Shape>> shapes;
+    std::vector<sf::Vector2f> velocities;
+    std::string font_path;
+    float font_size, font_r, font_g, font_b;
+
+    while (std::getline(configFile, line)) {
+        std::istringstream iss(line);
+        std::string type;
+        iss >> type;
+        if(type == "Window")
+        {
+            iss>> wWidth >> wHeight;
+        }
+        if(type == "Font")
+        {
+            iss>>font_path>>font_size>>font_r>>font_g>>font_b;
+        }
+        if (type == "Circle") {
+            std::string name;
+            float x, y, vx, vy, r, g, b, R;
+            iss >> name >> x >> y >> vx >> vy >> r >> g >> b >> R;
+            
+            auto circle = std::make_shared<sf::CircleShape>(R);
+            circle->setFillColor(sf::Color(r, g, b));
+            circle->setPosition(x, y);
+            shapes.push_back(circle);
+            velocities.push_back(sf::Vector2f(vx, vy));
+        }
+        else if (type == "Rectangle") {
+            std::string name;
+            float x, y, vx, vy, r, g, b, width, height;
+            iss >> name >> x >> y >> vx >> vy >> r >> g >> b >> width >> height;
+            
+            auto rect = std::make_shared<sf::RectangleShape>(sf::Vector2f(width, height));
+            rect->setFillColor(sf::Color(r, g, b, 255));
+            rect->setPosition(x, y);
+            shapes.push_back(rect);
+            velocities.push_back(sf::Vector2f(vx, vy));
+        }
+    }
+
+    
     sf::RenderWindow window(sf::VideoMode(wWidth, wHeight), "SFML Works");
     
-    // window.setVerticalSyncEnabled(true); // call it once, after creating the window
-    sf:: CircleShape circle(50);
-    circle.setFillColor(sf::Color::Green);
-    circle.setPosition(300.0f, 300.0f);
-    float circleMoveSpeed = 0.5f;
+    // // window.setVerticalSyncEnabled(true); // call it once, after creating the window
+    // sf:: CircleShape circle(50);
+    // circle.setFillColor(sf::Color::Green);
+    // circle.setPosition(300.0f, 300.0f);
+    // float circleMoveSpeed = 0.5f;
 
 
+    
     sf::Font myFont;
-    if (!myFont.loadFromFile("fonts/Roboto-Black.ttf")) 
+    if (!myFont.loadFromFile(font_path)) 
     {
-        std::cerr << "Error: Failed to load font from 'fonts/Roboto-Black.ttf'" << std::endl;
+        std::cerr << "Error: Failed to load font from '" << font_path << "'" << std::endl;
         exit(-1);
     }
     window.setFramerateLimit(60); // call it once, after creating the window
 
-    sf::Text text("Sample text", myFont, 24);
+    sf::Text text("Sample text", myFont, font_size);
+    text.setFillColor(sf::Color(font_r, font_g, font_b));
 
     text.setPosition(0, wHeight - (float)text.getCharacterSize());
 
-    std::vector<std::shared_ptr<sf::Shape>> shapes;
+    
 
-    std::shared_ptr<sf::Shape> c = std::make_shared<sf::CircleShape>(50);
-    std::shared_ptr<sf::Shape> r = std::make_shared<sf::RectangleShape>(sf::Vector2f(300,100));
-    shapes.push_back(c);
-    shapes.push_back(r);
-    r->setPosition(300, 300);
-
+    
+   
     while(window.isOpen())
     {
         sf::Event e;
@@ -53,13 +99,15 @@ int main()
                 if(e.key.code == sf::Keyboard::X)
                 {
                     std::cout<<"Direction changed\n";
-                    circleMoveSpeed *= -1.0f;
+                    // circleMoveSpeed *= -1.0f;
                 }
             }
         }
-        for(auto &circle:shapes)
+        for(size_t i = 0; i < shapes.size(); i++)
         {
-            circle->setPosition(circle->getPosition().x - circleMoveSpeed, circle->getPosition().y - circleMoveSpeed);
+            auto& shape = shapes[i];
+            auto& velocity = velocities[i];
+            shape->setPosition(shape->getPosition().x + velocity.x, shape->getPosition().y + velocity.y);
         }
 
         window.clear();
