@@ -27,6 +27,9 @@ class Rect
         velocity.x = vx;
         velocity.y = vy;
     }
+    void move(){
+        shape->setPosition(shape->getPosition().x+velocity.x , shape->getPosition().y + velocity.y);
+    }
     void invertXSpeed(){
         velocity.x *= -1.0f;
     }
@@ -54,6 +57,9 @@ class Circle
     {
         velocity.x = vx;
         velocity.y = vy;
+    }
+    void move(){
+        shape->setPosition(shape->getPosition().x+velocity.x , shape->getPosition().y + velocity.y);
     }
     void invertXSpeed(){
         velocity.x *= -1.0f;
@@ -121,7 +127,7 @@ int main()
         std::cerr << "Error: Failed to load font from '" << font_path << "'" << std::endl;
         exit(-1);
     }
-    window.setFramerateLimit(60); // call it once, after creating the window
+    window.setFramerateLimit(120); // call it once, after creating the window
 
     sf::Text text("Sample text", myFont, font_size);
     text.setFillColor(sf::Color(font_r, font_g, font_b));
@@ -147,11 +153,25 @@ int main()
 
                 if(e.key.code == sf::Keyboard::X)
                 {
-                
+                    // for(auto &shape:circles)
+                    // {
+                    //     shape.invertXSpeed();   
+                    // }
+                    // for(auto &shape:recs)
+                    // {
+                    //     shape.invertYSpeed();   
+                    // }
                 }
             }
         }
-        
+        for(auto &shape:circles)
+        {
+            shape.move();   
+        }
+        for(auto &shape:recs)
+        {
+            shape.move();   
+        }
 
         window.clear();
         for(auto &shape:circles)
