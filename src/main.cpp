@@ -200,7 +200,11 @@ int main()
             {
                 if(e.key.code == sf::Keyboard::X)
                 {
-                    // Not necessary for now.
+                    for(auto &shape:shapes)
+                    {
+                        shape.invertXSpeed();
+                        shape.invertYSpeed();
+                    }
                 }
             }
         }
