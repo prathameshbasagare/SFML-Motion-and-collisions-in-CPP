@@ -7,142 +7,125 @@
 #include<fstream>
 #include<sstream>
 
-class Rect
+enum class ShapeType {
+    Rectangle,
+    Circle
+};
+
+class Shape
 {
-    std::shared_ptr<sf::RectangleShape> shape;
-    sf::Vector2f velocity;
-    sf::Text name;
+    private:
+    std::unique_ptr<sf::Shape> shape_;
+    ShapeType type_;
+    sf::Vector2f velocity_;
+    sf::Text name_;
+
     public:
-    Rect(float x, float y, float r, float g, float b, float width, float height)
+    // Constructor for Rectangle
+    Shape(float x, float y, float r, float g, float b, float width, float height)
+        : type_(ShapeType::Rectangle)
     {
-        shape = std::make_shared<sf::RectangleShape>(sf::Vector2f(width, height));
-        shape->setFillColor(sf::Color(r, g, b, 255));
-        shape->setPosition(x, y);
+        shape_ = std::make_unique<sf::RectangleShape>(sf::Vector2f(width, height));
+        shape_->setFillColor(sf::Color(r, g, b, 255));
+        shape_->setPosition(x, y);
     }
-    sf::RectangleShape get()
+
+    // Constructor for Circle
+    Shape(float x, float y, float r, float g, float b, float radius)
+        : type_(ShapeType::Circle)
     {
-        return *shape;
+        shape_ = std::make_unique<sf::CircleShape>(radius);
+        shape_->setFillColor(sf::Color(r, g, b, 255));
+        shape_->setPosition(x, y);
     }
+
+    sf::Shape& getShape()
+    {
+        return *shape_;
+    }
+
     void setSpeed(float vx, float vy)
     {
-        velocity.x = vx;
-        velocity.y = vy;
+        velocity_.x = vx;
+        velocity_.y = vy;
     }
-    void setName(std::string nameStr, sf::Font& font, float s, float r, float g, float b)
+
+    void setName(const std::string& nameStr, sf::Font& font, float size, float r, float g, float b)
     {
-        // name = std::make_shared<sf::Text>(nameStr, font, s);
-        
-        float x = shape->getPosition().x;
-        float y = shape->getPosition().y;
+        float x = shape_->getPosition().x;
+        float y = shape_->getPosition().y;
 
-        sf::Text text(nameStr, font, s);
+        sf::Text text(nameStr, font, size);
         text.setFillColor(sf::Color(r, g, b));
-
-        // Get the local bounds of the text (includes offset and size)
         sf::FloatRect bounds = text.getLocalBounds();
 
-        // Get the size of the shape (e.g. rectangle)
-        sf::Vector2f dim = shape->getSize();
+        if (type_ == ShapeType::Rectangle) {
+            // Rectangle centering logic
+            sf::Vector2f dim = static_cast<sf::RectangleShape*>(shape_.get())->getSize();
+            float posX = x + dim.x / 2.f - (bounds.width / 2.f + bounds.left);
+            float posY = y + dim.y / 2.f - (bounds.height / 2.f + bounds.top);
+            text.setPosition(posX, posY);
+        } else {
+            // Circle centering logic
+            float radius = static_cast<sf::CircleShape*>(shape_.get())->getRadius();
+            float posX = x + radius - (bounds.width / 2.f + bounds.left);
+            float posY = y + radius - (bounds.height / 2.f + bounds.top);
+            text.setPosition(posX, posY);
+        }
 
-        // Calculate precise centered position inside the shape
-        float posX = x + dim.x / 2.f - (bounds.width / 2.f + bounds.left);
-        float posY = y + dim.y / 2.f - (bounds.height / 2.f + bounds.top);
-
-        text.setPosition(posX, posY);
-
-        name=text;
+        name_ = text;
     }
+
     sf::Text& getName()
     {
-        return name;
+        return name_;
     }
+
     void move()
     {
-        shape->setPosition(shape->getPosition().x+velocity.x , shape->getPosition().y + velocity.y);
-        name.setPosition(name.getPosition().x+velocity.x , name.getPosition().y + velocity.y);
+        shape_->setPosition(shape_->getPosition().x + velocity_.x,
+                           shape_->getPosition().y + velocity_.y);
+        name_.setPosition(name_.getPosition().x + velocity_.x,
+                         name_.getPosition().y + velocity_.y);
     }
+
     void invertXSpeed()
     {
-        velocity.x *= -1.0f;
+        velocity_.x *= -1.0f;
     }
+
     void invertYSpeed()
     {
-        velocity.y *= -1.0f;
+        velocity_.y *= -1.0f;
     }
-    void handleCollision(int wWidth, int wHeight){
-        float x = shape->getPosition().x, y= shape->getPosition().y;
-        sf::Vector2f dim = shape->getSize();
 
-        if(x<=0 || x + dim.x >= wWidth){
-            this->invertXSpeed();
-        }
-        if(y<=0 || y+ dim.y >= wHeight){
-            this->invertYSpeed();
-        }
-    }
-};
-class Circle
-{
-    std::shared_ptr<sf::CircleShape> shape;
-    sf::Vector2f velocity;
-    sf::Text name;
-    public:
-    Circle(float x, float y, float r, float g, float b, float R)
+    void handleCollision(int wWidth, int wHeight)
     {
-        shape = std::make_shared<sf::CircleShape>(R);
-        shape->setFillColor(sf::Color(r, g, b, 255));
-        shape->setPosition(x, y);
-    }
-    sf::CircleShape get()
-    {
-        return *shape;
-    }
-    void setSpeed(float vx, float vy)
-    {
-        velocity.x = vx;
-        velocity.y = vy;
-    }
-    void setName(std::string nameStr, sf::Font& font, float s, float r, float g, float b)
-    {
-        float x = shape->getPosition().x, y= shape->getPosition().y;
-        float w = (float)name.getLocalBounds().width, h = (float)name.getCharacterSize();
-        float radius = shape->getRadius();
+        float x = shape_->getPosition().x;
+        float y = shape_->getPosition().y;
 
-        sf::Text text(nameStr, font, s);
-        text.setFillColor(sf::Color(r, g, b));
-        sf::FloatRect bounds = text.getLocalBounds();
-
-        text.setPosition(
-            x + radius - (bounds.width / 2.f + bounds.left),
-            y + radius - (bounds.height / 2.f + bounds.top)
-        );
-        name = text;
-    }
-    sf::Text& getName()
-    {
-        return name;
-    }
-    void move(){
-        shape->setPosition(shape->getPosition().x+velocity.x , shape->getPosition().y + velocity.y);
-        name.setPosition(name.getPosition().x+velocity.x , name.getPosition().y + velocity.y);
-    }
-    void invertXSpeed(){
-        velocity.x *= -1.0f;
-    }
-    void invertYSpeed()
-    {
-        velocity.y *= -1.0f;
-    }
-    void handleCollision(int wWidth, int wHeight){
-        float x = shape->getPosition().x, y= shape->getPosition().y;
-        float radius = shape->getRadius();
-
-        if(x<=0 || x + 2 * radius >= wWidth){
-            this->invertXSpeed();
+        if (type_ == ShapeType::Rectangle) {
+            sf::Vector2f dim = static_cast<sf::RectangleShape*>(shape_.get())->getSize();
+            if (x <= 0 || x + dim.x >= wWidth) {
+                invertXSpeed();
+            }
+            if (y <= 0 || y + dim.y >= wHeight) {
+                invertYSpeed();
+            }
+        } else {
+            float radius = static_cast<sf::CircleShape*>(shape_.get())->getRadius();
+            if (x <= 0 || x + 2 * radius >= wWidth) {
+                invertXSpeed();
+            }
+            if (y <= 0 || y + 2 * radius >= wHeight) {
+                invertYSpeed();
+            }
         }
-        if(y<=0 || y+ 2 * radius >= wHeight){
-            this->invertYSpeed();
-        }
+    }
+
+    ShapeType getType() const
+    {
+        return type_;
     }
 };
 
@@ -156,8 +139,7 @@ int main()
     std::string line;
     
 
-    std::vector<Circle> circles;
-    std::vector<Rect> recs;
+    std::vector<Shape> shapes;
     std::string font_path;
     float font_size, font_r, font_g, font_b;
     sf::Font myFont;
@@ -180,23 +162,23 @@ int main()
         }
         if (type == "Circle") {
             std::string name;
-            float x, y, vx, vy, r, g, b, R;
-            iss >> name >> x >> y >> vx >> vy >> r >> g >> b >> R;
-            
-            Circle c(x,y,r,g,b,R);
-            c.setSpeed(vx,vy);
-            c.setName(name, myFont, font_size, font_r, font_g, font_b );
-            circles.push_back(c);
+            float x, y, vx, vy, r, g, b, radius;
+            iss >> name >> x >> y >> vx >> vy >> r >> g >> b >> radius;
+
+            Shape shape(x, y, r, g, b, radius);
+            shape.setSpeed(vx, vy);
+            shape.setName(name, myFont, font_size, font_r, font_g, font_b);
+            shapes.push_back(std::move(shape));
         }
         else if (type == "Rectangle") {
             std::string name;
             float x, y, vx, vy, r, g, b, width, height;
             iss >> name >> x >> y >> vx >> vy >> r >> g >> b >> width >> height;
-            
-            Rect c(x,y,r,g,b,width,height);
-            c.setSpeed(vx,vy);
-            c.setName(name, myFont, font_size, font_r, font_g, font_b );
-            recs.push_back(c);
+
+            Shape shape(x, y, r, g, b, width, height);
+            shape.setSpeed(vx, vy);
+            shape.setName(name, myFont, font_size, font_r, font_g, font_b);
+            shapes.push_back(std::move(shape));
         }
     }
 
@@ -204,13 +186,6 @@ int main()
     sf::RenderWindow window(sf::VideoMode(wWidth, wHeight), "SFML Works");
 
     window.setFramerateLimit(1000); // call it once, after creating the window
-
-    // sf::Text text("Sample text", myFont, font_size);
-    // text.setFillColor(sf::Color(font_r, font_g, font_b));
-
-    // text.setPosition(0, wHeight - (float)text.getCharacterSize());
-
- 
    
     while(window.isOpen())
     {
@@ -230,26 +205,16 @@ int main()
             }
         }
 
-        for(auto &shape:circles)
+        for(auto &shape : shapes)
         {
-            shape.handleCollision(wWidth,wHeight);
-            shape.move();   
-        }
-        for(auto &shape:recs)
-        {
-            shape.handleCollision(wWidth,wHeight);
-            shape.move();   
+            shape.handleCollision(wWidth, wHeight);
+            shape.move();
         }
 
         window.clear();
-        for(auto &shape:circles)
+        for(auto &shape : shapes)
         {
-            window.draw(shape.get());
-            window.draw(shape.getName());
-        }
-        for(auto &shape:recs)
-        {
-            window.draw(shape.get());
+            window.draw(shape.getShape());
             window.draw(shape.getName());
         }
         // window.draw(text);
