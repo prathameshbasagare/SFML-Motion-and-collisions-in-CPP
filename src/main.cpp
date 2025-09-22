@@ -11,6 +11,7 @@ class Rect
 {
     std::shared_ptr<sf::RectangleShape> shape;
     sf::Vector2f velocity;
+    sf::Text name;
     public:
     Rect(float x, float y, float r, float g, float b, float width, float height)
     {
@@ -27,10 +28,30 @@ class Rect
         velocity.x = vx;
         velocity.y = vy;
     }
-    void move(){
-        shape->setPosition(shape->getPosition().x+velocity.x , shape->getPosition().y + velocity.y);
+    void setName(std::string nameStr, sf::Font& font, float s, float r, float g, float b)
+    {
+        // name = std::make_shared<sf::Text>(nameStr, font, s);
+        
+        float x = shape->getPosition().x, y= shape->getPosition().y;
+        float w = (float)name.getLocalBounds().width, h = (float)name.getCharacterSize();
+
+        sf::Text text(nameStr, font, s);
+        text.setFillColor(sf::Color(r, g, b));
+        sf::Vector2f dim = shape->getSize();
+        text.setPosition(x+ (float)(dim.x/2)-(3*h/4), y + (float)(dim.y/2) - (h/2));
+        name=text;
     }
-    void invertXSpeed(){
+    sf::Text& getName()
+    {
+        return name;
+    }
+    void move()
+    {
+        shape->setPosition(shape->getPosition().x+velocity.x , shape->getPosition().y + velocity.y);
+        name.setPosition(name.getPosition().x+velocity.x , name.getPosition().y + velocity.y);
+    }
+    void invertXSpeed()
+    {
         velocity.x *= -1.0f;
     }
     void invertYSpeed()
@@ -53,6 +74,7 @@ class Circle
 {
     std::shared_ptr<sf::CircleShape> shape;
     sf::Vector2f velocity;
+    sf::Text name;
     public:
     Circle(float x, float y, float r, float g, float b, float R)
     {
@@ -69,8 +91,25 @@ class Circle
         velocity.x = vx;
         velocity.y = vy;
     }
+    void setName(std::string nameStr, sf::Font& font, float s, float r, float g, float b)
+    {
+        float x = shape->getPosition().x, y= shape->getPosition().y;
+        float w = (float)name.getLocalBounds().width, h = (float)name.getCharacterSize();
+        float radius = shape->getRadius();
+
+        sf::Text text(nameStr, font, s);
+        text.setFillColor(sf::Color(r, g, b));
+
+        text.setPosition(x+radius-(3*h/4), y+radius-(h/2));
+        name = text;
+    }
+    sf::Text& getName()
+    {
+        return name;
+    }
     void move(){
         shape->setPosition(shape->getPosition().x+velocity.x , shape->getPosition().y + velocity.y);
+        name.setPosition(name.getPosition().x+velocity.x , name.getPosition().y + velocity.y);
     }
     void invertXSpeed(){
         velocity.x *= -1.0f;
@@ -106,7 +145,7 @@ int main()
     std::vector<Rect> recs;
     std::string font_path;
     float font_size, font_r, font_g, font_b;
-
+    sf::Font myFont;
     while (std::getline(configFile, line)) {
         std::istringstream iss(line);
         std::string type;
@@ -118,6 +157,11 @@ int main()
         if(type == "Font")
         {
             iss>>font_path>>font_size>>font_r>>font_g>>font_b;
+            if (!myFont.loadFromFile(font_path)) 
+            {
+                std::cerr << "Error: Failed to load font from '" << font_path << "'" << std::endl;
+                exit(-1);
+            }
         }
         if (type == "Circle") {
             std::string name;
@@ -126,6 +170,7 @@ int main()
             
             Circle c(x,y,r,g,b,R);
             c.setSpeed(vx,vy);
+            c.setName(name, myFont, font_size, font_r, font_g, font_b );
             circles.push_back(c);
         }
         else if (type == "Rectangle") {
@@ -135,6 +180,7 @@ int main()
             
             Rect c(x,y,r,g,b,width,height);
             c.setSpeed(vx,vy);
+            c.setName(name, myFont, font_size, font_r, font_g, font_b );
             recs.push_back(c);
         }
     }
@@ -142,14 +188,6 @@ int main()
     
     sf::RenderWindow window(sf::VideoMode(wWidth, wHeight), "SFML Works");
 
-
-    
-    sf::Font myFont;
-    if (!myFont.loadFromFile(font_path)) 
-    {
-        std::cerr << "Error: Failed to load font from '" << font_path << "'" << std::endl;
-        exit(-1);
-    }
     window.setFramerateLimit(1000); // call it once, after creating the window
 
     // sf::Text text("Sample text", myFont, font_size);
@@ -192,12 +230,14 @@ int main()
         for(auto &shape:circles)
         {
             window.draw(shape.get());
+            window.draw(shape.getName());
         }
         for(auto &shape:recs)
         {
             window.draw(shape.get());
+            window.draw(shape.getName());
         }
-        window.draw(text);
+        // window.draw(text);
         window.display();
     }
     return 0;
