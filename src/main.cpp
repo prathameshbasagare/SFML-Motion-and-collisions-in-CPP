@@ -32,13 +32,24 @@ class Rect
     {
         // name = std::make_shared<sf::Text>(nameStr, font, s);
         
-        float x = shape->getPosition().x, y= shape->getPosition().y;
-        float w = (float)name.getLocalBounds().width, h = (float)name.getCharacterSize();
+        float x = shape->getPosition().x;
+        float y = shape->getPosition().y;
 
         sf::Text text(nameStr, font, s);
         text.setFillColor(sf::Color(r, g, b));
+
+        // Get the local bounds of the text (includes offset and size)
+        sf::FloatRect bounds = text.getLocalBounds();
+
+        // Get the size of the shape (e.g. rectangle)
         sf::Vector2f dim = shape->getSize();
-        text.setPosition(x+ (float)(dim.x/2)-(3*h/4), y + (float)(dim.y/2) - (h/2));
+
+        // Calculate precise centered position inside the shape
+        float posX = x + dim.x / 2.f - (bounds.width / 2.f + bounds.left);
+        float posY = y + dim.y / 2.f - (bounds.height / 2.f + bounds.top);
+
+        text.setPosition(posX, posY);
+
         name=text;
     }
     sf::Text& getName()
@@ -99,8 +110,12 @@ class Circle
 
         sf::Text text(nameStr, font, s);
         text.setFillColor(sf::Color(r, g, b));
+        sf::FloatRect bounds = text.getLocalBounds();
 
-        text.setPosition(x+radius-(3*h/4), y+radius-(h/2));
+        text.setPosition(
+            x + radius - (bounds.width / 2.f + bounds.left),
+            y + radius - (bounds.height / 2.f + bounds.top)
+        );
         name = text;
     }
     sf::Text& getName()
