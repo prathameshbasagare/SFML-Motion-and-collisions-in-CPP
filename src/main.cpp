@@ -15,7 +15,7 @@ enum class ShapeType {
 class Shape
 {
     private:
-    std::unique_ptr<sf::Shape> shape_;
+    std::shared_ptr<sf::Shape> shape_;
     ShapeType type_;
     sf::Vector2f velocity_;
     sf::Text name_;
@@ -25,7 +25,7 @@ class Shape
     Shape(float x, float y, float r, float g, float b, float width, float height)
         : type_(ShapeType::Rectangle)
     {
-        shape_ = std::make_unique<sf::RectangleShape>(sf::Vector2f(width, height));
+        shape_ = std::make_shared<sf::RectangleShape>(sf::Vector2f(width, height));
         shape_->setFillColor(sf::Color(r, g, b, 255));
         shape_->setPosition(x, y);
     }
@@ -34,7 +34,7 @@ class Shape
     Shape(float x, float y, float r, float g, float b, float radius)
         : type_(ShapeType::Circle)
     {
-        shape_ = std::make_unique<sf::CircleShape>(radius);
+        shape_ = std::make_shared<sf::CircleShape>(radius);
         shape_->setFillColor(sf::Color(r, g, b, 255));
         shape_->setPosition(x, y);
     }
